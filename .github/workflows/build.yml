@@ -478,26 +478,26 @@ jobs:
           wget -O Gopeed.template.tar.gz "https://github.com/GopeedLab/QpkgBuild/raw/refs/heads/master/template/Gopeed.template.tar.gz"
           tar -zxf Gopeed.template.tar.gz
           [[ -d Gopeed ]] || exit 1
-          goos_arr=(linux)
+          goos=linux
           goarch_arr=(amd64 arm64)
-          for goos in "${goos_arr[@]}"; do
-            for goarch in "${goarch_arr[@]}"; do
-              qarch=x86_64
-              if [[ "${goarch}" == "amd64" ]]; then
-                qarch=x86_64
-              elif [[ "${goarch}" == "arm64" ]]; then
-                qarch=arm_64
-              else
-                echo "Unknown goarch=[${goarch}]!"
-                continue
-              fi
-              name=gopeed-web-v${VERSION}-${goos}-${goarch}
-              cp dist/${name}/${name}/* Gopeed/${qarch}/
-            done
+          for goarch in "${goarch_arr[@]}"; do
+            qarch=x86_64
+            [[ "${goarch}" == "arm64" ]] && qarch=arm_64
+            name=gopeed-web-v${VERSION}-${goos}-${goarch}
+            cp dist/${name}/${name}/* Gopeed/${qarch}/
           done
           cd Gopeed
           sed -i -e 's/__QPKG_VER__/${VERSION}/g' qpkg.cfg
-          qbuild && cp -ra build/*.qpkg ../dist/zip/
+          qbuild || exit 1
+          goos=qnap
+          goarch_arr=(amd64 arm64)
+          for goarch in "${goarch_arr[@]}"; do
+            qarch=x86_64
+            [[ "${goarch}" == "arm64" ]] && qarch=arm_64
+            sname=Gopeed_${VERSION}_${qarch}.qpkg
+            dname=gopeed-web-v${VERSION}-${goos}-${goarch}.qpkg
+            [[ -f ${sname} ]] && cp -ra build/${sname} ../dist/zip/${dname}
+          done
           for f in ../dist/zip/*; do
             echo ">>> dist=[${f}]"
           done
