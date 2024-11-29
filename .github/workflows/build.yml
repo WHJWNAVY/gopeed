@@ -489,6 +489,7 @@ jobs:
           cd Gopeed
           sed -i -e 's/__QPKG_VER__/${VERSION}/g' qpkg.cfg
           qbuild || exit 1
+          for f in build/*; do echo ">>> build=[${f}]"; done
           goos=qnap
           goarch_arr=(amd64 arm64)
           for goarch in "${goarch_arr[@]}"; do
@@ -496,11 +497,10 @@ jobs:
             [[ "${goarch}" == "arm64" ]] && qarch=arm_64
             sname=Gopeed_${VERSION}_${qarch}.qpkg
             dname=gopeed-web-v${VERSION}-${goos}-${goarch}.qpkg
-            [[ -f ${sname} ]] && cp -ra build/${sname} ../dist/zip/${dname}
+            echo "sname=${sname}, dname=${dname}"
+            [[ -f build/${sname} ]] && cp -ra build/${sname} ../dist/zip/${dname}
           done
-          for f in ../dist/zip/*; do
-            echo ">>> dist=[${f}]"
-          done
+          for f in ../dist/zip/*; do echo ">>> dist=[${f}]"; done
           cd ..
       - name: Upload
         uses: shogo82148/actions-upload-release-asset@v1
